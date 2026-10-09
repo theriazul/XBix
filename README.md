@@ -36,7 +36,7 @@ Leaflet uses the exact standard raster URL `https://tile.openstreetmap.org/{z}/{
 
 Browsers control the `User-Agent` for web page image requests; JavaScript cannot set a custom User-Agent on Leaflet tile images. The app does not spoof one. The page sends the permitted origin referrer, uses normal browser caching, and requests tiles only for the visible map area (no prefetch/offline downloads). If OSM still returns 403 after deploying this correction, check the browser Network panel for the response and referrer: a network-level or provider-side block cannot be bypassed in frontend code. OSM standard tiles are best-effort with no SLA. For dependable production traffic, use a tile provider whose terms explicitly cover the expected usage or self-host tiles; any public browser key must be domain-restricted, and a private key must never be embedded in this static app.
 
-After publishing to GitHub Pages, hard-reload `https://theriazul.github.io/NumberCheck/` and inspect Network → `tile.openstreetmap.org`. Tile responses should be successful and include a `Referer` containing the site origin. Verify the map attribution remains visible and test pan/zoom on desktop and mobile.
+After publishing to GitHub Pages, hard-reload `https://theriazul.github.io/XBix/` and inspect Network → `tile.openstreetmap.org`. Tile responses should be successful and include a `Referer` containing the site origin. Verify the map attribution remains visible and test pan/zoom on desktop and mobile.
 
 ## GitHub Pages deployment
 
