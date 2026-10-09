@@ -1,4 +1,4 @@
-# NumberCheck
+# NumberCheck: XBix
 
 A static, browser-only phone number format checker with an approximate country map, a global administrative place explorer, and consent-based device location sharing.
 
