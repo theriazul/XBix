@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090b10">
+    <meta name="description" content="Validate international phone number formats, explore country-level maps, and share your own location only with browser permission.">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://unpkg.com/libphonenumber-js@1.11.20/bundle/libphonenumber-max.js https://unpkg.com/leaflet@1.9.4/dist/leaflet.js https://unpkg.com/lucide@1.53.0; style-src 'self' https://fonts.googleapis.com/css2 https://unpkg.com/leaflet@1.9.4/dist/leaflet.css; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org; connect-src 'self' https://cdn.jsdelivr.net https://photon.komoot.io; upgrade-insecure-requests">
+    <title>NumberCheck | Phone information, honestly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+    <script src="https://unpkg.com/libphonenumber-js@1.11.20/bundle/libphonenumber-max.js" integrity="sha384-NwHivc9dYvASALKiVC/GEb5BZnpHUrTVFz5geScUzwv2BqcOQsLY64K9vLSGvrvc" crossorigin="anonymous" defer></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous" defer></script>
+    <script src="https://unpkg.com/lucide@1.53.0" integrity="sha384-9jc6sq4hIHE19IfEOsGFw4OBb8FXKksvsPgSzlLdEJO7Z0GT1a+TUtBYK/+FAk3p" crossorigin="anonymous" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="#home" aria-label="NumberCheck home">
+            <span class="brand-mark"><i data-lucide="scan-line" aria-hidden="true"></i></span>
+            <span>number<span class="brand-accent">check</span></span>
+        </a>
+        <button class="menu-toggle icon-button" id="menuToggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primaryNav">
+            <i data-lucide="menu" aria-hidden="true"></i>
+        </button>
+        <nav class="primary-nav" id="primaryNav" aria-label="Main navigation">
+            <a href="#home">Lookup</a>
+            <a href="#country-map">Map</a>
+            <a href="#district-explorer">Places</a>
+            <a href="#share-location">Share location</a>
+            <a href="#about">About</a>
+        </nav>
+        <span class="header-status"><span class="status-dot"></span> Private by design</span>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="hero-grid shell">
+                <div class="hero-copy">
+                    <p class="eyebrow"><span class="eyebrow-line"></span> PHONE NUMBER, DECODED</p>
+                    <h1>Know the format.<br><span>Not the person.</span></h1>
+                    <p class="hero-description">Check international number formats and calling regions with transparent, trusted numbering data. No tracing. No guesswork.</p>
+                    <div class="hero-trust"><i data-lucide="shield-check" aria-hidden="true"></i> Your number stays in this browser</div>
+                </div>
+                <div class="lookup-panel">
+                    <div class="panel-heading">
+                        <div><span class="step-label">01 / NUMBER LOOKUP</span><h2>Check a phone number</h2></div>
+                        <span class="heading-icon"><i data-lucide="scan-search" aria-hidden="true"></i></span>
+                    </div>
+                    <p class="panel-description">Use the full international format, including <strong>+</strong> and country code.</p>
+                    <form id="phoneForm" novalidate>
+                        <label for="phoneNumber">International phone number</label>
+                        <div class="search-field">
+                            <i data-lucide="phone" aria-hidden="true"></i>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter phone number" autocomplete="tel" inputmode="tel" aria-describedby="phoneHint phoneError">
+                            <button class="search-submit" id="searchButton" type="submit"><span>Analyze</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+                        </div>
+                        <div class="form-meta"><span id="phoneHint">Example: +880 1XXX-XXXXXX</span><span id="phoneError" class="field-error" role="alert"></span></div>
+                    </form>
+                    <div class="lookup-footnote"><i data-lucide="info" aria-hidden="true"></i><span>Format checks cannot confirm whether a number is active or identify its owner.</span></div>
+                </div>
+            </div>
+            <div class="hero-rule shell"><span>BUILT FOR CLARITY</span><span>NO PRIVATE TELECOM DATA</span><span>OPEN MAP DATA</span></div>
+        </section>
+
+        <div class="dashboard shell">
+            <section class="section-block" id="information" aria-labelledby="informationTitle">
+                <div class="section-heading">
+                    <div><p class="eyebrow">LOOKUP DETAILS</p><h2 id="informationTitle">Phone number information</h2></div>
+                    <button id="clearSearchBtn" class="text-button" type="button"><i data-lucide="rotate-ccw" aria-hidden="true"></i> Clear search</button>
+                </div>
+                <div id="phoneResult" class="result-panel empty-state" aria-live="polite" aria-atomic="true">
+                    <span class="empty-icon"><i data-lucide="scan" aria-hidden="true"></i></span>
+                    <div><h3>Ready when you are</h3><p>Enter an international number above to see its validated format and numbering region.</p></div>
+                </div>
+                <div class="history-row">
+                    <div class="history-title"><i data-lucide="history" aria-hidden="true"></i><div><strong>Recent checks</strong><span>Saved only in this browser. GPS coordinates are never included.</span></div></div>
+                    <div class="history-actions"><div id="historyList" class="history-list" aria-label="Recent number checks"></div><button id="clearHistoryBtn" class="subtle-button" type="button">Clear history</button></div>
+                </div>
+            </section>
+
+            <section class="section-block" id="country-map" aria-labelledby="mapTitle">
+                <div class="section-heading">
+                    <div><p class="eyebrow">OPENSTREETMAP · LEAFLET</p><h2 id="mapTitle">Interactive map</h2></div>
+                    <button id="resetMapBtn" class="subtle-button" type="button"><i data-lucide="maximize-2" aria-hidden="true"></i> Reset view</button>
+                </div>
+                <div class="map-frame"><div id="map" role="application" aria-label="Interactive world map showing approximate selected locations"></div><div class="map-caption"><span class="map-pin-dot"></span><span id="mapResult" aria-live="polite">Search a number, choose a place, or share your location.</span></div></div>
+                <p class="map-disclaimer"><i data-lucide="triangle-alert" aria-hidden="true"></i> A country-level view is not the phone owner's actual location. Shared calling codes are resolved using valid number metadata; ambiguous or unsupported regions are not guessed.</p>
+            </section>
+
+            <section class="section-block" id="district-explorer" aria-labelledby="districtTitle">
+                <div class="section-heading">
+                    <div><p class="eyebrow">COUNTRIES · REGIONS · PLACES</p><h2 id="districtTitle">Global location explorer</h2></div>
+                    <span class="count-badge" id="countryCountBadge">GLOBAL PLACE DATA</span>
+                </div>
+                <form class="geo-global-search" id="globalPlaceForm" role="search" autocomplete="off">
+                    <label for="globalPlaceSearch">Search any place worldwide</label>
+                    <div class="geo-search-input-wrap">
+                        <i data-lucide="search" aria-hidden="true"></i>
+                        <input id="globalPlaceSearch" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="globalPlaceSuggestions" aria-describedby="globalSearchHint" placeholder="Try a place and country, such as Ontario, Canada" autocomplete="off">
+                        <button class="search-submit" id="globalPlaceSearchButton" type="submit"><span>Search places</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+                    </div>
+                    <p class="geo-hint" id="globalSearchHint">Searches place names only. Phone numbers and GPS coordinates are not sent to the geographic search service.</p>
+                    <div class="geo-suggestions" id="globalPlaceSuggestions" role="listbox" aria-label="Matching places" hidden></div>
+                </form>
+                <div class="geo-country-row">
+                    <div class="geo-control geo-country-control">
+                        <label for="countrySearch">Country or territory</label>
+                        <div class="geo-input-wrap"><i data-lucide="globe-2" aria-hidden="true"></i><input id="countrySearch" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="countrySuggestions" placeholder="Search countries" autocomplete="off" aria-describedby="countrySourceHint"><span class="geo-field-badge" id="selectedCountryCode"></span></div>
+                        <p id="countrySourceHint">Country catalog: <a target="_blank" rel="noopener noreferrer">world-countries</a> data (ODbL, 250 entries); type to filter.</p>
+                        <div class="geo-suggestions" id="countrySuggestions" role="listbox" aria-label="Countries and territories" hidden></div>
+                    </div>
+                    <div class="geo-source-note" id="geoStatus" role="status" aria-live="polite"><i data-lucide="info" aria-hidden="true"></i><span>Choose a country, search a place, or explore divisions below. Selection is manual and separate from phone lookup and GPS.</span></div>
+                </div>
+                <div class="geo-level-grid">
+                    <div class="geo-control">
+                        <label for="admin1Search">State / province / first-level division</label>
+                        <div class="geo-input-wrap"><i data-lucide="map" aria-hidden="true"></i><input id="admin1Search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="admin1Suggestions" placeholder="Choose a country first" autocomplete="off" disabled></div>
+                        <div class="geo-suggestions" id="admin1Suggestions" role="listbox" aria-label="First-level divisions" hidden></div>
+                    </div>
+                    <div class="geo-control">
+                        <label for="admin2Search">District / county / second-level division</label>
+                        <div class="geo-input-wrap"><i data-lucide="map-pinned" aria-hidden="true"></i><input id="admin2Search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="admin2Suggestions" placeholder="Choose a first-level division" autocomplete="off" disabled></div>
+                        <div class="geo-suggestions" id="admin2Suggestions" role="listbox" aria-label="Second-level divisions and places" hidden></div>
+                    </div>
+                    <div class="geo-control">
+                        <label for="admin3Search">City / municipality / locality</label>
+                        <div class="geo-input-wrap"><i data-lucide="building-2" aria-hidden="true"></i><input id="admin3Search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="admin3Suggestions" placeholder="Choose a parent location" autocomplete="off" disabled></div>
+                        <div class="geo-suggestions" id="admin3Suggestions" role="listbox" aria-label="Cities and localities" hidden></div>
+                    </div>
+                </div>
+                <div class="geo-details" id="geoDetails" aria-live="polite" aria-atomic="true">
+                    <span class="geo-details-icon"><i data-lucide="map-pin" aria-hidden="true"></i></span>
+                    <div class="geo-details-copy"><span class="step-label">LOCATION DETAILS</span><h3>No location selected</h3><p>Pick a result to see its country, administrative type, source, and coordinate quality.</p></div>
+                </div>
+                <div class="geo-footer-row">
+                    <span><i data-lucide="info" aria-hidden="true"></i> Photon searches OpenStreetMap place data. Coverage and naming vary by region; search results are not a complete official gazetteer.</span>
+                    <div class="geo-map-actions"><button class="subtle-button" id="fitGeoLocationBtn" type="button" disabled><i data-lucide="scan" aria-hidden="true"></i> Fit to location</button><button class="subtle-button" id="resetGeoMapBtn" type="button"><i data-lucide="globe-2" aria-hidden="true"></i> Reset map</button></div>
+                </div>
+                <p class="map-disclaimer"><i data-lucide="triangle-alert" aria-hidden="true"></i> Points are approximate geocoder locations. Photon does not return full administrative boundary geometry; the app does not draw inferred polygons. Some places and administrative levels may be missing or misclassified in OpenStreetMap data.</p>
+            </section>
+
+            <section class="section-block location-section" id="share-location" aria-labelledby="locationTitle">
+                <div class="location-copy"><p class="eyebrow">CONSENT-BASED · DEVICE ONLY</p><h2 id="locationTitle">Share my location</h2><p>Show this device's location on the map. Your browser will ask permission only after you choose to share.</p><div class="location-assurance"><i data-lucide="lock-keyhole" aria-hidden="true"></i> Coordinates are not uploaded or saved by this app.</div></div>
+                <div class="location-actions"><button id="shareLocationBtn" class="primary-button" type="button"><i data-lucide="locate-fixed" aria-hidden="true"></i> Share my location</button><button id="clearLocationBtn" class="subtle-button" type="button" disabled><i data-lucide="x" aria-hidden="true"></i> Clear location</button><div id="gpsResult" class="gps-result" aria-live="polite" aria-atomic="true">Location has not been shared.</div></div>
+                <p class="location-note"><i data-lucide="globe-2" aria-hidden="true"></i> Geolocation requires HTTPS or localhost in supported browsers. Entering someone else's number cannot reveal their GPS location.</p>
+            </section>
+
+            <section class="bottom-info" id="about">
+                <div><p class="eyebrow">ABOUT THIS TOOL</p><h2>Useful information, without the overclaim.</h2><p>NumberCheck validates number structure against international numbering metadata. A valid format does not prove the number is assigned, active, reachable, or owned by a particular person.</p></div>
+                <div class="privacy-box" id="privacy"><span class="privacy-icon"><i data-lucide="shield" aria-hidden="true"></i></span><div><h3>Privacy &amp; limitations</h3><p>Phone checks run in your browser. Recent numbers use this browser's local storage until you clear them. Place names go to Photon for geographic search; GPS coordinates are not sent to that search service or saved in history. Maps and data load from third parties when online.</p></div></div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer"><a class="brand" href="#home"><span class="brand-mark"><i data-lucide="scan-line" aria-hidden="true"></i></span><span>number<span class="brand-accent">check</span></span></a><span>&copy; 2026 <a href="https://github.com/theriazul" target="_blank" rel="noopener noreferrer">Riazul Islam Tusar</a>. Built for Clarity. Your location stays yours.</span><button class="footer-privacy-trigger" id="openPrivacyDialog" type="button" aria-haspopup="dialog" aria-controls="privacyDialog">Privacy &amp; Limitations</button></footer>
+    <dialog class="privacy-modal" id="privacyDialog" aria-labelledby="privacyDialogTitle" aria-describedby="privacyDialogSubtitle" aria-modal="true">
+        <div class="privacy-dialog">
+            <header class="privacy-dialog-header">
+                <div>
+                    <p class="eyebrow">YOUR DATA, YOUR CHOICE</p>
+                    <h2 id="privacyDialogTitle">Privacy &amp; Limitations</h2>
+                    <p class="privacy-dialog-subtitle" id="privacyDialogSubtitle">A clear guide to what this browser-based tool can access, and what it cannot.</p>
+                </div>
+                <button class="privacy-close icon-button" id="closePrivacyDialog" type="button" aria-label="Close privacy and limitations dialog" autofocus><i data-lucide="x" aria-hidden="true"></i></button>
+            </header>
+            <nav class="privacy-step-nav" aria-label="Privacy topics">
+                <button type="button" data-step-target="privacy-step-1" aria-label="Go to step 1: Data privacy" aria-current="step"><span>01</span><span class="privacy-step-nav-label">Data privacy</span></button>
+                <button type="button" data-step-target="privacy-step-2" aria-label="Go to step 2: Phone number information"><span>02</span><span class="privacy-step-nav-label">Phone numbers</span></button>
+                <button type="button" data-step-target="privacy-step-3" aria-label="Go to step 3: GPS location permission"><span>03</span><span class="privacy-step-nav-label">GPS permission</span></button>
+                <button type="button" data-step-target="privacy-step-4" aria-label="Go to step 4: Location accuracy"><span>04</span><span class="privacy-step-nav-label">Accuracy</span></button>
+                <button type="button" data-step-target="privacy-step-5" aria-label="Go to step 5: Map services"><span>05</span><span class="privacy-step-nav-label">Map services</span></button>
+                <button type="button" data-step-target="privacy-step-6" aria-label="Go to step 6: Local search history"><span>06</span><span class="privacy-step-nav-label">History</span></button>
+                <button type="button" data-step-target="privacy-step-7" aria-label="Go to step 7: Important limitations"><span>07</span><span class="privacy-step-nav-label">Limits</span></button>
+            </nav>
+            <div class="privacy-dialog-content" id="privacyDialogContent" tabindex="0" aria-label="Privacy information">
+                <section class="privacy-step" id="privacy-step-1" aria-labelledby="privacy-step-title-1">
+                    <span class="privacy-step-number">STEP 01</span>
+                    <h3 id="privacy-step-title-1">Data privacy</h3>
+                    <p>In its current frontend-only implementation, this website does not automatically collect or upload precise GPS coordinates to a server. When you choose to share your device location, coordinates are held in this page only and are not sent to a server by the app.</p>
+                </section>
+                <section class="privacy-step" id="privacy-step-2" aria-labelledby="privacy-step-title-2">
+                    <span class="privacy-step-number">STEP 02</span>
+                    <h3 id="privacy-step-title-2">Phone number information</h3>
+                    <p>A supported international number can be checked against numbering-plan metadata to identify its country calling code and region. A phone number alone cannot reveal its owner's identity, home address, current district, or live GPS location.</p>
+                </section>
+                <section class="privacy-step" id="privacy-step-3" aria-labelledby="privacy-step-title-3">
+                    <span class="privacy-step-number">STEP 03</span>
+                    <h3 id="privacy-step-title-3">GPS location permission</h3>
+                    <p>Device location is requested only after you explicitly click <strong>Share my location</strong>, and only if you grant the browser's location permission. You can clear the displayed coordinates at any time.</p>
+                </section>
+                <section class="privacy-step" id="privacy-step-4" aria-labelledby="privacy-step-title-4">
+                    <span class="privacy-step-number">STEP 04</span>
+                    <h3 id="privacy-step-title-4">Location accuracy</h3>
+                    <p>Reported GPS accuracy depends on your device, browser, available location signals, and surroundings. A displayed coordinate and its accuracy estimate may not identify an exact address.</p>
+                </section>
+                <section class="privacy-step" id="privacy-step-5" aria-labelledby="privacy-step-title-5">
+                    <span class="privacy-step-number">STEP 05</span>
+                    <h3 id="privacy-step-title-5">Map services</h3>
+                    <p>When you are online, map tiles and other resources are requested from third-party services, including OpenStreetMap, Photon place search, jsDelivr country data, public CDNs, and Google Fonts. Place searches send the place-name query and selected ISO country code (if any) to Photon; phone numbers and GPS coordinates are not part of those searches. Map attribution: tiles &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>; map interface by <a href="https://leafletjs.com/" target="_blank" rel="noopener noreferrer">Leaflet</a>. If the map is zoomed to shared GPS, tile requests can reveal the approximate area being viewed, but the app does not send raw coordinates to the tile service. If you open the coordinate link in OpenStreetMap, coordinates are included in that URL request.</p>
+                </section>
+                <section class="privacy-step" id="privacy-step-6" aria-labelledby="privacy-step-title-6">
+                    <span class="privacy-step-number">STEP 06</span>
+                    <h3 id="privacy-step-title-6">Local search history</h3>
+                    <p>Up to five successfully validated phone numbers are saved in this browser's local storage to show recent checks. They remain until replaced or you choose <strong>Clear history</strong>. GPS coordinates are not added to search history. This browser storage is not encrypted, and scripts running in this page can technically access it; clear history on shared devices.</p>
+                </section>
+                <section class="privacy-step" id="privacy-step-7" aria-labelledby="privacy-step-title-7">
+                    <span class="privacy-step-number">STEP 07</span>
+                    <h3 id="privacy-step-title-7">Important limitations</h3>
+                    <p>This website is not connected to private telecom databases. It cannot identify subscribers, retrieve private registration details, or secretly track another person's phone or GPS location. A country-level map is not a phone's live position.</p>
+                </section>
+            </div>
+            <footer class="privacy-dialog-footer"><span><i data-lucide="shield-check" aria-hidden="true"></i> No phone tracing. No hidden location access.</span><button class="text-button privacy-done" type="button" data-close-privacy>Got it</button></footer>
+        </div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
