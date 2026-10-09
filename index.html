@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#090b10">
     <meta name="description" content="Validate international phone number formats, explore country-level maps, and share your own location only with browser permission.">
-    <meta name="referrer" content="no-referrer">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://unpkg.com/libphonenumber-js@1.11.20/bundle/libphonenumber-max.js https://unpkg.com/leaflet@1.9.4/dist/leaflet.js https://unpkg.com/lucide@1.53.0; style-src 'self' https://fonts.googleapis.com/css2 https://unpkg.com/leaflet@1.9.4/dist/leaflet.css; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org; connect-src 'self' https://cdn.jsdelivr.net https://photon.komoot.io; upgrade-insecure-requests">
-    <title>NumberCheck | Phone information, honestly</title>
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://unpkg.com/libphonenumber-js@1.11.20/bundle/libphonenumber-max.js https://unpkg.com/leaflet@1.9.4/dist/leaflet.js https://unpkg.com/lucide@1.53.0; style-src 'self' https://fonts.googleapis.com/css2 https://unpkg.com/leaflet@1.9.4/dist/leaflet.css; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self' https://cdn.jsdelivr.net https://photon.komoot.io; upgrade-insecure-requests">
+    <title>XBix - Phone Number Validator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
     <header class="site-header">
         <a class="brand" href="#home" aria-label="NumberCheck home">
             <span class="brand-mark"><i data-lucide="scan-line" aria-hidden="true"></i></span>
-            <span>number<span class="brand-accent">check</span></span>
+            <span>X<span class="brand-accent">Bix</span></span>
         </a>
         <button class="menu-toggle icon-button" id="menuToggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primaryNav">
             <i data-lucide="menu" aria-hidden="true"></i>
@@ -88,7 +88,7 @@
                     <div><p class="eyebrow">OPENSTREETMAP · LEAFLET</p><h2 id="mapTitle">Interactive map</h2></div>
                     <button id="resetMapBtn" class="subtle-button" type="button"><i data-lucide="maximize-2" aria-hidden="true"></i> Reset view</button>
                 </div>
-                <div class="map-frame"><div id="map" role="application" aria-label="Interactive world map showing approximate selected locations"></div><div class="map-caption"><span class="map-pin-dot"></span><span id="mapResult" aria-live="polite">Search a number, choose a place, or share your location.</span></div></div>
+                <div class="map-frame"><div id="map" role="application" aria-label="Interactive world map showing approximate selected locations"></div><div class="map-tile-fallback" id="mapTileFallback" role="status" aria-live="polite" hidden><i data-lucide="wifi-off" aria-hidden="true"></i><span>Map tiles are unavailable. Location search and details still work. <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">Report a map issue</a></span></div><div class="map-caption"><span class="map-pin-dot"></span><span id="mapResult" aria-live="polite">Search a number, choose a place, or share your location.</span></div></div>
                 <p class="map-disclaimer"><i data-lucide="triangle-alert" aria-hidden="true"></i> A country-level view is not the phone owner's actual location. Shared calling codes are resolved using valid number metadata; ambiguous or unsupported regions are not guessed.</p>
             </section>
 
@@ -157,7 +157,7 @@
         </div>
     </main>
 
-    <footer class="site-footer"><a class="brand" href="#home"><span class="brand-mark"><i data-lucide="scan-line" aria-hidden="true"></i></span><span>number<span class="brand-accent">check</span></span></a><span>&copy; 2026 <a href="https://github.com/theriazul" target="_blank" rel="noopener noreferrer">Riazul Islam Tusar</a>. Built for Clarity. Your location stays yours.</span><button class="footer-privacy-trigger" id="openPrivacyDialog" type="button" aria-haspopup="dialog" aria-controls="privacyDialog">Privacy &amp; Limitations</button></footer>
+    <footer class="site-footer"><a class="brand" href="#home"><span class="brand-mark"><i data-lucide="scan-line" aria-hidden="true"></i></span><span>X<span class="brand-accent">Bix</span></span></a><span>&copy; 2026 <a href="https://github.com/theriazul" target="_blank" rel="noopener noreferrer">Riazul Islam Tusar</a>. Built for Clarity. Your location stays yours.</span><button class="footer-privacy-trigger" id="openPrivacyDialog" type="button" aria-haspopup="dialog" aria-controls="privacyDialog">Privacy &amp; Limitations</button></footer>
     <dialog class="privacy-modal" id="privacyDialog" aria-labelledby="privacyDialogTitle" aria-describedby="privacyDialogSubtitle" aria-modal="true">
         <div class="privacy-dialog">
             <header class="privacy-dialog-header">

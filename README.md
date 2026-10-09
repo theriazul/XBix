@@ -30,6 +30,14 @@ Open `index.html`, or serve this folder from `localhost` (recommended for clipbo
 
 The static app has no API keys or backend. It loads `libphonenumber-js`, Leaflet, and Lucide from pinned CDNs; the country catalog comes from jsDelivr, place search from the Photon public demo, fonts from Google Fonts, and map tiles from OpenStreetMap. These services require an internet connection. Photon allows reasonable use but may throttle requests and does not guarantee availability; production/high-volume use needs an appropriately hosted geocoder or backend. OpenStreetMap data is ODbL and tile use is subject to its separate tile usage policy. Keep visible [OpenStreetMap attribution](https://www.openstreetmap.org/copyright).
 
+### OpenStreetMap tile requests
+
+Leaflet uses the exact standard raster URL `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, as required by the [OSMF tile policy](https://operations.osmfoundation.org/policies/tiles/). The previous configuration used the `{s}` `a`/`b`/`c` tile subdomains and set `Referrer-Policy: no-referrer`; OSM requires the canonical host and a valid web `Referer`, so suppressing it can lead to blocked tile requests. The current `strict-origin-when-cross-origin` policy sends only this site's origin to external services and leaves OSM able to identify the site. Do not change it back to `no-referrer` for OSM tiles.
+
+Browsers control the `User-Agent` for web page image requests; JavaScript cannot set a custom User-Agent on Leaflet tile images. The app does not spoof one. The page sends the permitted origin referrer, uses normal browser caching, and requests tiles only for the visible map area (no prefetch/offline downloads). If OSM still returns 403 after deploying this correction, check the browser Network panel for the response and referrer: a network-level or provider-side block cannot be bypassed in frontend code. OSM standard tiles are best-effort with no SLA. For dependable production traffic, use a tile provider whose terms explicitly cover the expected usage or self-host tiles; any public browser key must be domain-restricted, and a private key must never be embedded in this static app.
+
+After publishing to GitHub Pages, hard-reload `https://theriazul.github.io/NumberCheck/` and inspect Network → `tile.openstreetmap.org`. Tile responses should be successful and include a `Referer` containing the site origin. Verify the map attribution remains visible and test pan/zoom on desktop and mobile.
+
 ## GitHub Pages deployment
 
 1. Put `index.html`, `style.css`, `script.js`, and this README in the repository root.
@@ -53,14 +61,14 @@ This frontend cannot access private telecom databases, identify subscribers, ret
 
 ## Browser policy and hosting
 
-`index.html` includes a restrictive Content Security Policy meta tag for the actual resources used: same-origin app files; pinned scripts and Leaflet CSS on unpkg; country data on jsDelivr; place queries on Photon; Google Fonts CSS and font files; and the three OpenStreetMap tile hosts. It blocks objects, frames, unapproved form targets, and other resource origins. `img-src data:` permits Leaflet's tiny transparent GIF tile-loading placeholder; it does not permit data scripts or styles. `style-src-attr 'unsafe-inline'` is limited to style attributes because Leaflet positions map elements with runtime inline styles; script `unsafe-inline` and `unsafe-eval` are not enabled. The page also sets a `no-referrer` policy.
+`index.html` includes a restrictive Content Security Policy meta tag for the actual resources used: same-origin app files; pinned scripts and Leaflet CSS on unpkg; country data on jsDelivr; place queries on Photon; Google Fonts CSS and font files; and the single OpenStreetMap tile host. It blocks objects, frames, unapproved form targets, and other resource origins. `img-src data:` permits Leaflet's tiny transparent GIF tile-loading placeholder; it does not permit data scripts or styles. `style-src-attr 'unsafe-inline'` is limited to style attributes because Leaflet positions map elements with runtime inline styles; script `unsafe-inline` and `unsafe-eval` are not enabled. The page uses `strict-origin-when-cross-origin` so OSM receives the origin Referer required by its tile policy without receiving the full path.
 
 The third-party scripts and Leaflet stylesheet are version-pinned and use Subresource Integrity (SRI). Keep each integrity digest in sync with the exact file when updating a dependency. Google Fonts may serve browser-dependent CSS, so it is not SRI-pinned. CDN libraries and OpenStreetMap tiles require an internet connection.
 
 The meta CSP is a useful static-site fallback, not equivalent to HTTP response headers. In particular, CSP `frame-ancestors`, report-only enforcement, HSTS, `X-Content-Type-Options`, and `Permissions-Policy` must be set as response headers to be reliable; GitHub Pages does not provide a repository file for arbitrary custom response headers. For stronger hosting-level policy, put a CDN or reverse proxy that supports response-header rules in front of the site. Recommended headers include:
 
 ```text
-Referrer-Policy: no-referrer
+Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=()
 X-Content-Type-Options: nosniff
 Content-Security-Policy: <the site's tested policy, with frame-ancestors 'none'>

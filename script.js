@@ -46,6 +46,10 @@ const shareLocationBtn = document.getElementById("shareLocationBtn");
 const clearLocationBtn = document.getElementById("clearLocationBtn");
 const toast = document.getElementById("toast");
 let map;
+let mapTileLayer;
+let mapResizeObserver;
+let mapTileErrorCount = 0;
+let mapTileFailureHandled = false;
 let countryMarker;
 let gpsMarker;
 let explorerMarker;
@@ -330,19 +334,45 @@ function showToast(message) {
 }
 
 function initializeMap() {
+    if (map) return;
     if (!window.L) {
         mapResult.textContent = "The map library did not load. Check your connection; phone format checks can still work.";
         return;
     }
 
     map = L.map("map", { scrollWheelZoom: false }).setView(DEFAULT_VIEW.center, DEFAULT_VIEW.zoom);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    mapTileLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        minZoom: 0,
         maxZoom: 19
-    }).addTo(map);
+    });
+    mapTileLayer.on("tileerror", () => {
+        mapTileErrorCount += 1;
+        if (mapTileErrorCount >= 3) showMapTileFallback();
+    });
+    mapTileLayer.addTo(map);
     map.getContainer().tabIndex = 0;
     map.getContainer().addEventListener("focusin", () => map.scrollWheelZoom.enable());
     map.getContainer().addEventListener("focusout", () => map.scrollWheelZoom.disable());
+
+    if ("ResizeObserver" in window) {
+        mapResizeObserver = new ResizeObserver(() => map?.invalidateSize({ pan: false, debounceMoveend: true }));
+        mapResizeObserver.observe(map.getContainer());
+    } else {
+        window.addEventListener("resize", () => map?.invalidateSize({ pan: false, debounceMoveend: true }));
+    }
+    window.requestAnimationFrame(() => map?.invalidateSize({ pan: false }));
+}
+
+function showMapTileFallback() {
+    if (mapTileFailureHandled) return;
+    mapTileFailureHandled = true;
+    if (map && mapTileLayer && map.hasLayer(mapTileLayer)) map.removeLayer(mapTileLayer);
+    document.getElementById("mapTileFallback").hidden = false;
+    mapResult.textContent = "Basemap tiles stopped after repeated loading errors.";
+    if (["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+        console.warn("NumberCheck: map tiles failed repeatedly; stopped the tile layer. Verify network access and the provider's usage policy.");
+    }
 }
 
 function setPhoneError(message) {
